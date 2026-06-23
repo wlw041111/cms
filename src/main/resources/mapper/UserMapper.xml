@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.vuecms1.mapper.UserMapper">
+
+    <!-- 用户结果映射 -->
+    <resultMap id="UserResultMap" type="org.example.vuecms1.entity.User">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="createdTime" column="create_time"/>
+        <result property="updatedTime" column="update_time"/>
+        <!-- 关联角色 -->
+        <result property="role" column="role_name"/>
+    </resultMap>
+
+
+    <!-- 查询所有用户（包含角色） -->
+    <select id="getUser" resultMap="UserResultMap">
+        SELECT
+            u.id,
+            u.username,
+            u.password,
+            u.create_time,
+            u.update_time,
+            r.name AS role_name
+        FROM user u
+                 LEFT JOIN user_role ur ON u.id = ur.user_id
+                 LEFT JOIN role r ON ur.role_id = r.id
+        ORDER BY u.id
+    </select>
+    <select id="insertUserRole" resultType="string">
+        SELECT name from role
+
+    </select>
+
+    <!-- 根据ID查询用户（包含角色） -->
+    <select id="getUserById" resultMap="UserResultMap">
+        SELECT
+            u.id,
+            u.username,
+            u.password,
+            u.create_time,
+            u.update_time,
+            r.name AS role_name
+        FROM user u
+                 LEFT JOIN user_role ur ON u.id = ur.user_id
+                 LEFT JOIN role r ON ur.role_id = r.id
+        WHERE u.id = #{id}
+    </select>
+
+    <!-- 根据用户名查询用户（包含角色） -->
+    <select id="getUserByUsername" resultMap="UserResultMap">
+        SELECT
+            u.id,
+            u.username,
+            u.password,
+            u.create_time,
+            u.update_time,
+            r.name AS role_name
+        FROM user u
+                 LEFT JOIN user_role ur ON u.id = ur.user_id
+                 LEFT JOIN role r ON ur.role_id = r.id
+        WHERE u.username = #{username}
+    </select>
+
+    <!-- 新增用户 -->
+    <insert id="adduser" parameterType="org.example.vuecms1.entity.User"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (username, password, create_time, update_time)
+        VALUES (#{username}, #{password}, #{createdTime}, #{updatedTime})
+
+    </insert>
+
+    <!-- 更新用户基本信息 -->
+    <update id="updateUser" parameterType="org.example.vuecms1.entity.User">
+        UPDATE user_role
+        SET role_id = (
+            SELECT id
+            FROM role
+            WHERE name = #{role}
+        )
+        WHERE user_id = #{id}
+    </update>
+
+    <!-- 删除用户 -->
+    <delete id="deleteuser">
+        DELETE FROM user WHERE id = #{id}
+    </delete>
+
+    <!-- 删除用户角色关联 -->
+    <delete id="deleteUserRole">
+        DELETE FROM user_role WHERE user_id = #{userId}
+    </delete>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO new_save (news_title, news_type, value_html, create_time)
+        VALUES (#{newsTitle}, #{newsType}, #{valueHtml}, NOW())
+    </insert>
+
+    <!-- 查询所有新闻，按时间降序 -->
+    <select id="selectAll" resultType="org.example.vuecms1.entity.New">
+        SELECT id, news_title as newsTitle, news_type as newsType,
+               value_html as valueHtml, create_time as createTime
+        FROM new_save
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据类型查询 -->
+    <select id="selectByType" resultType="org.example.vuecms1.entity.New">
+        SELECT id, news_title as newsTitle, news_type as newsType,
+               value_html as valueHtml, create_time as createTime
+        FROM new_save
+        WHERE news_type = #{newsType}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据ID查询详情 -->
+    <select id="selectById" resultType="org.example.vuecms1.entity.New">
+        SELECT id, news_title as newsTitle, news_type as newsType,
+               value_html as valueHtml, create_time as createTime
+        FROM new_save
+        WHERE id = #{id}
+    </select>
+
+</mapper>
