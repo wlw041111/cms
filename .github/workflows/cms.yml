@@ -19,24 +19,36 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # 使用官方 checkout 动作，保证目录正确
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          ref: master
+      - name: Native Git Checkout with SSH
+        run: |
+          export PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:$PATH
+          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o ServerAliveInterval=10"
+          
+          echo "Cleaning up workspace..."
+          find . -mindepth 1 -delete 2>/dev/null || true
+          
+          echo "Cloning private repository via SSH..."
+          # 先测试 SSH 连接
+          ssh -T git@github.com || true
+          # 克隆
+          git clone --depth 1 -b master git@github.com:Xuweiguang10086/vue-cms1.git .
+          
+          echo "Clone completed successfully!"
 
       - name: MD5 Fingerprint Detection
         id: filter
         run: |
           export PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:$PATH
+          
           CACHE_DIR="/tmp/cms_deploy_cache"
           mkdir -p $CACHE_DIR
           OLD_FINGERPRINT="$CACHE_DIR/last_src_md5.txt"
+          
           CURRENT_FINGERPRINT=$(find src/ pom.xml -type f -exec md5sum {} + | sort | md5sum | cut -d' ' -f1)
           echo "Current Source Fingerprint: $CURRENT_FINGERPRINT"
 
           NEED_BUILD="false"
+          
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.force_rebuild }}" = "true" ]; then
               echo "Decision: Manual Force Build."
               NEED_BUILD="true"
@@ -52,6 +64,7 @@ jobs:
           fi
 
           echo "$CURRENT_FINGERPRINT" > "$OLD_FINGERPRINT"
+          
           if [ "$NEED_BUILD" = "true" ]; then
               touch ./RUN_MAVEN_BUILD
               [ -d "target" ] && rm -rf target/
