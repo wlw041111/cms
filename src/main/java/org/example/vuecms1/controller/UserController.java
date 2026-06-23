@@ -64,6 +64,7 @@ public class UserController {
         log.info("保存新闻{}", news);
         userMapper.insert(news);
         return "success";
+        //
     }
 
     /**
