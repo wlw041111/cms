@@ -19,13 +19,10 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # 使用官方 checkout 动作，保证目录正确
       - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          repository: Xuweiguang10086/vue-cms1  # 添加这行
-          fetch-depth: 1
-          ref: master
+        run: |
+          git clone --depth 1 -b master git@github.com:Xuweiguang10086/vue-cms1.git .
+          ls -la
 
       - name: MD5 Fingerprint Detection
         id: filter
