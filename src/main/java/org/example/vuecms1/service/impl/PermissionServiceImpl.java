@@ -36,7 +36,7 @@ public class PermissionServiceImpl implements PermissionService {
         String menuType = pageRequest.getParamValue("menuType");
         if (StringUtils.hasText(name)) {
             queryWrapper.like("name", name);
-        }
+        }//
         if (StringUtils.hasText(code)) {
             queryWrapper.like("code", code);
         }
