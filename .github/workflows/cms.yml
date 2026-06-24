@@ -2,7 +2,7 @@ name: CMS
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master ]           # main → master
     paths:
       - 'src/**'
       - 'pom.xml'
@@ -19,32 +19,30 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout code
-        env:
-          SSH_AUTH_SOCK: /run/user/1003/keyring/ssh
+      - name: Native Git Checkout with SSH
         run: |
-          echo "Current directory: $(pwd)"
-          echo "Testing SSH connection..."
-          ssh -T git@github.com || true
-          echo "Setting up SSH agent..."
-          eval "$(ssh-agent -s)"
-          ssh-add /home/deploy/.ssh/id_rsa
-          echo "Cloning repository..."
-          git clone --depth 1 -b master git@github.com:Xuweiguang10086/vue-cms1.git .
-          echo "Clone completed. Listing files:"
-          ls -la
+          export PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:$PATH
+          
+          echo "Cleaning up workspace..."
+          find . -mindepth 1 -delete 2>/dev/null || true
+          
+          echo "Cloning private repository via SSH..."
+          git clone --depth 1 -b master git@github.com:Xuweiguang10086/vue-cms1.git .   # 改这里
 
       - name: MD5 Fingerprint Detection
         id: filter
         run: |
           export PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:$PATH
+          
           CACHE_DIR="/tmp/cms_deploy_cache"
           mkdir -p $CACHE_DIR
           OLD_FINGERPRINT="$CACHE_DIR/last_src_md5.txt"
+          
           CURRENT_FINGERPRINT=$(find src/ pom.xml -type f -exec md5sum {} + | sort | md5sum | cut -d' ' -f1)
           echo "Current Source Fingerprint: $CURRENT_FINGERPRINT"
 
           NEED_BUILD="false"
+          
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.force_rebuild }}" = "true" ]; then
               echo "Decision: Manual Force Build."
               NEED_BUILD="true"
@@ -60,6 +58,7 @@ jobs:
           fi
 
           echo "$CURRENT_FINGERPRINT" > "$OLD_FINGERPRINT"
+          
           if [ "$NEED_BUILD" = "true" ]; then
               touch ./RUN_MAVEN_BUILD
               [ -d "target" ] && rm -rf target/
@@ -70,7 +69,7 @@ jobs:
         run: |
           if [ -f "./RUN_MAVEN_BUILD" ]; then
               echo "Executing Maven Build..."
-              export JAVA_HOME=/opt/jdk-17.0.12
+              export JAVA_HOME=/opt/jdk-17.0.12          # 改这里（你的实际路径）
               export PATH=$JAVA_HOME/bin:/opt/maven/bin:$PATH
               mvn clean package -DskipTests
           else
@@ -79,7 +78,7 @@ jobs:
 
       - name: Local Release and Lifecycle Management
         run: |
-          export JAVA_HOME=/opt/jdk-17.0.12
+          export JAVA_HOME=/opt/jdk-17.0.12             # 改这里（你的实际路径）
           export PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:$PATH
           if [ -f "./RUN_MAVEN_BUILD" ]; then
               echo "Action: Full Versioned Deploy"
