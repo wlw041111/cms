@@ -19,32 +19,23 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # 用最原始、最安全的 Shell 命令代替官方的 actions/checkout，彻底绕过 Node/GLIBC 报错
-      - name: Native Git Checkout with SSH
-        run: |
-          export PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:$PATH
-          
-          echo "Cleaning up workspace..."
-          find . -mindepth 1 -delete 2>/dev/null || true
-          
-          echo "Cloning private repository via SSH..."
-          # 权限配好后，最标准的原生克隆，既快又稳
-          git clone --depth 1 -b master git@github.com:Xuweiguang10086/vue-cms1.git .
+      # 使用官方 checkout 动作，保证目录正确
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: master
 
       - name: MD5 Fingerprint Detection
         id: filter
         run: |
-          # 使用服务器固定目录存储指纹
-          CACHE_DIR="/opt/cms_cache"
-          sudo mkdir -p $CACHE_DIR
-          sudo chown -R deploy:deploy $CACHE_DIR
+          export PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:$PATH
+          CACHE_DIR="/tmp/cms_deploy_cache"
+          mkdir -p $CACHE_DIR
           OLD_FINGERPRINT="$CACHE_DIR/last_src_md5.txt"
-          
-          # 计算当前代码指纹
-          CURRENT_FINGERPRINT=$(find src/ pom.xml -type f -exec md5sum {} + 2>/dev/null | sort | md5sum | cut -d' ' -f1)
-          echo "Current Fingerprint: $CURRENT_FINGERPRINT"
-          
-          # 判断是否需要构建
+          CURRENT_FINGERPRINT=$(find src/ pom.xml -type f -exec md5sum {} + | sort | md5sum | cut -d' ' -f1)
+          echo "Current Source Fingerprint: $CURRENT_FINGERPRINT"
+
           NEED_BUILD="false"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.force_rebuild }}" = "true" ]; then
               echo "Decision: Manual Force Build."
@@ -52,32 +43,26 @@ jobs:
           elif [ ! -f "$OLD_FINGERPRINT" ]; then
               echo "Decision: No cache found. First time build."
               NEED_BUILD="true"
-          elif [ "$CURRENT_FINGERPRINT" != "$(cat $OLD_FINGERPRINT 2>/dev/null)" ]; then
+          elif [ "$CURRENT_FINGERPRINT" != "$(cat $OLD_FINGERPRINT)" ]; then
               echo "Decision: Source code changed (Fingerprint mismatch)."
               NEED_BUILD="true"
           else
               echo "Decision: Source code identical. Skip build."
               NEED_BUILD="false"
           fi
-          
-          # 保存新的指纹
+
           echo "$CURRENT_FINGERPRINT" > "$OLD_FINGERPRINT"
-          
-          # 设置输出
-          echo "code_changed=$NEED_BUILD" >> $GITHUB_OUTPUT
-          
-          # 如果需要构建，创建标记文件
           if [ "$NEED_BUILD" = "true" ]; then
               touch ./RUN_MAVEN_BUILD
               [ -d "target" ] && rm -rf target/
           fi
-          echo "code_changed=$NEED_BUILD" >> $GITHUB_OUTPUT
+          echo "code_changed=$NEED_BUILD" >> $GITHUB_OUTPUTzz
 
       - name: Build with Maven
         run: |
           if [ -f "./RUN_MAVEN_BUILD" ]; then
               echo "Executing Maven Build..."
-              export JAVA_HOME=/opt/jdk-17.0.14
+              export JAVA_HOME=/opt/jdk-17.0.12
               export PATH=$JAVA_HOME/bin:/opt/maven/bin:$PATH
               mvn clean package -DskipTests
           else
@@ -86,20 +71,15 @@ jobs:
 
       - name: Local Release and Lifecycle Management
         run: |
-          export JAVA_HOME=/opt/jdk-17.0.14
+          export JAVA_HOME=/opt/jdk-17.0.12
           export PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:$PATH
           if [ -f "./RUN_MAVEN_BUILD" ]; then
               echo "Action: Full Versioned Deploy"
               REL_DIR="/app/cms/releases/${{ github.sha }}"
               sudo mkdir -p $REL_DIR
-          
-              # 物理保险
               sudo cp target/*.jar $REL_DIR/my-cms.jar
               sudo ln -snf $REL_DIR/my-cms.jar /app/cms/current.jar
-          
-              # 保留 5 个版本
               cd /app/cms/releases && ls -t | tail -n +6 | xargs sudo rm -rf 2>/dev/null || true
-          
               sudo systemctl restart cms
               for i in {1..10}; do
                 if ss -tuln | grep -q :8080; then echo "Service UP!"; exit 0; fi
