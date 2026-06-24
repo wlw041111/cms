@@ -22,7 +22,7 @@ public class CorsConfig {
 
         // 允许的请求头
         config.addAllowedHeader("*");
-
+//
         // 允许的请求方式
         config.addAllowedMethod("*");
 
