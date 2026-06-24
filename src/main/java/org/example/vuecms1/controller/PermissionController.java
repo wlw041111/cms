@@ -1,15 +1,13 @@
 package org.example.vuecms1.controller;
 
-
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.example.vuecms1.dto.PermissionDTO;
 import org.example.vuecms1.entity.Permission;
-import org.example.vuecms1.service.PermissionService;
+import org.example.vuecms1.mapper.PermissionMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import util.PageRequest;
-import util.Result;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -17,31 +15,47 @@ import java.util.List;
 public class PermissionController {
 
     @Autowired
-    private PermissionService permissionService;
+    private PermissionMapper permissionMapper;
 
-    @PostMapping("/page")
-    public Result<IPage<Permission>> getPermissionPage(@RequestBody PageRequest pageRequest) {
-        return Result.success(permissionService.getPermissionPage(pageRequest));
+    @GetMapping("/list")
+    public List<Permission> getPermissionList() {
+        System.out.println("========== 收到获取权限列表请求 ==========");
+        List<Permission> list = permissionMapper.selectList(null);
+        System.out.println("查询到权限数量：" + (list != null ? list.size() : 0));
+        return list;
     }
 
-    @GetMapping("/tree")
-    public Result<List<Permission>> getPermissionTree() {
-        return Result.success(permissionService.getPermissionTree());
+    @PostMapping("/add")
+    public void createPermission(@RequestBody PermissionDTO permissionDTO) {
+        System.out.println("========== 收到新增权限请求 ==========");
+        System.out.println("权限数据：" + permissionDTO);
+        Permission permission = new Permission();
+        BeanUtils.copyProperties(permissionDTO, permission);
+        permission.setCreateTime(LocalDateTime.now());
+        permissionMapper.insert(permission);
+        System.out.println("新增成功");
     }
 
-    @PostMapping
-    public Result<Permission> createPermission(@RequestBody PermissionDTO permissionDTO) {
-        return Result.success("权限已新增", permissionService.createPermission(permissionDTO));
+    @PutMapping("/update/{id}")
+    public void updatePermission(@PathVariable Integer id, @RequestBody PermissionDTO permissionDTO) {
+        System.out.println("========== 收到更新权限请求 ==========");
+        System.out.println("权限ID：" + id);
+        System.out.println("权限数据：" + permissionDTO);
+        Permission permission = permissionMapper.selectById(id);
+        if (permission != null) {
+            BeanUtils.copyProperties(permissionDTO, permission);
+            permissionMapper.updateById(permission);
+            System.out.println("更新成功");
+        } else {
+            System.out.println("权限不存在");
+        }
     }
 
-    @PutMapping("/{id}")
-    public Result<Permission> updatePermission(@PathVariable Integer id, @RequestBody PermissionDTO permissionDTO) {
-        return Result.success("权限已更新", permissionService.updatePermission(id, permissionDTO));
-    }
-
-    @DeleteMapping("/{id}")
-    public Result<Void> deletePermission(@PathVariable Integer id) {
-        permissionService.deletePermission(id);
-        return Result.success("权限已删除");
+    @DeleteMapping("/delete/{id}")
+    public void deletePermission(@PathVariable Integer id) {
+        System.out.println("========== 收到删除权限请求 ==========");
+        System.out.println("权限ID：" + id);
+        permissionMapper.deleteById(id);
+        System.out.println("删除成功");
     }
 }

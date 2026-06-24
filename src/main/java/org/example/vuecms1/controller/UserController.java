@@ -31,16 +31,17 @@ public class UserController {
 
     @PostMapping("/updateUser")
     public List<User> updateUser(@RequestBody User user) {
-        log.info("User<UNK>{}", user);
+        log.info("User<UNK>更新{}", user);
         userMapper.updateUser(user);
         return null;
     }
 
     @PostMapping("/adduser")
-    public List<User> adduser(@RequestBody User user) {
-        log.info("User<UNK>{}", user);
+    public User adduser(@RequestBody User user) {  // ✅ 改成 User
+        log.info("新增用户: {}", user);
         userMapper.adduser(user);
-        return null;
+        log.info("插入后 ID: {}", user.getId());
+        return user;  // ✅ 返回包含 ID 的 user
     }
 
     @PostMapping("/deleteUser")
@@ -50,12 +51,21 @@ public class UserController {
         return null;
     }
 
-    @PostMapping("/getUserRole")
-    public List<String> insertUserRole() {
-        List<String> result = userMapper.insertUserRole();
-        log.info("后端返回的数据：{}", result);
-        return result;
+    @PostMapping("/insertUserRole")
+    public void insertUserRole(@RequestBody User user) {
+        log.info("后端返回的数据：{}", user);
+          userMapper.insertUserRole(user);
+
+
     }
+
+    @PostMapping("/getUserRole")
+    public List<String> getUserRole() {
+       return userMapper.selectRole();
+
+
+    }
+
 
     // ===== 新闻相关接口 =====
 

@@ -13,12 +13,12 @@ public interface UserMapper {
 int updateUser(User user);
  int adduser(User user);
  int deleteuser(User user);
- List<String> insertUserRole();
+ int insertUserRole(User user);
  /**
   * 插入新闻
   */
  int insert(New news);
-
+ List<String> selectRole();
  /**
   * 查询所有新闻
   */

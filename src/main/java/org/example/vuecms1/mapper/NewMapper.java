@@ -7,5 +7,6 @@ import org.example.vuecms1.entity.New;
 
 @Mapper
 public interface NewMapper extends BaseMapper<New> {
-
+   int updateStatus(Integer id, Integer staute);
+int updatenew( New news);
 }

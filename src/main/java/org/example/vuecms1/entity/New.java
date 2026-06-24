@@ -10,4 +10,5 @@ public class New {
     private String newsType;
     private String valueHtml;
     private LocalDateTime createTime;
+    private Integer staute;
 }

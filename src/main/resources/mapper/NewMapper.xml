@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.vuecms1.mapper.NewMapper">
+
+    <resultMap id="NewResultMap" type="org.example.vuecms1.entity.New">
+        <id property="id" column="id"/>
+        <result property="newsTitle" column="news_title"/>
+        <result property="newsType" column="news_type"/>
+        <result property="valueHtml" column="value_html"/>
+        <result property="createTime" column="create_time"/>
+        <result property="staute" column="staute"/>
+    </resultMap>
+    <update id="updateStatus">
+        UPDATE new_save
+        SET staute = #{staute}
+        WHERE id = #{id}
+    </update>
+    <!-- 更新新闻 -->
+    <update id="updatenew">
+        UPDATE new_save
+        SET news_title = #{newsTitle},
+            news_type = #{newsType},
+            value_html = #{valueHtml},
+             staute = 0
+        WHERE id = #{id}
+    </update>
+
+
+</mapper>

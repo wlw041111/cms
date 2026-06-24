@@ -29,10 +29,11 @@
                  LEFT JOIN role r ON ur.role_id = r.id
         ORDER BY u.id
     </select>
-    <select id="insertUserRole" resultType="string">
-        SELECT name from role
-
-    </select>
+    <insert id="insertUserRole" parameterType="org.example.vuecms1.entity.User">
+        INSERT INTO user_role (user_id, role_id)
+        VALUES (#{id}, (SELECT id FROM role WHERE name = #{role}))
+        <!-- ↑ 子查询写在 SQL 中，不在 #{} 内 -->
+    </insert>
 
     <!-- 根据ID查询用户（包含角色） -->
     <select id="getUserById" resultMap="UserResultMap">
@@ -70,6 +71,7 @@
         INSERT INTO user (username, password, create_time, update_time)
         VALUES (#{username}, #{password}, #{createdTime}, #{updatedTime})
 
+
     </insert>
 
     <!-- 更新用户基本信息 -->
@@ -101,7 +103,8 @@
     <!-- 查询所有新闻，按时间降序 -->
     <select id="selectAll" resultType="org.example.vuecms1.entity.New">
         SELECT id, news_title as newsTitle, news_type as newsType,
-               value_html as valueHtml, create_time as createTime
+        value_html as valueHtml, create_time as createTime,
+        staute as  staute <!-- 关键修改：将status映射为staute -->
         FROM new_save
         ORDER BY create_time DESC
     </select>
@@ -121,6 +124,9 @@
                value_html as valueHtml, create_time as createTime
         FROM new_save
         WHERE id = #{id}
+    </select>
+    <select id="selectRole" resultType="string">
+        select name from role
     </select>
 
 </mapper>
