@@ -23,6 +23,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          repository: Xuweiguang10086/vue-cms1  # 添加这行
           fetch-depth: 1
           ref: master
 
@@ -56,7 +57,7 @@ jobs:
               touch ./RUN_MAVEN_BUILD
               [ -d "target" ] && rm -rf target/
           fi
-          echo "code_changed=$NEED_BUILD" >> $GITHUB_OUTPUTzz
+          echo "code_changed=$NEED_BUILD" >> $GITHUB_OUTPUT
 
       - name: Build with Maven
         run: |
