@@ -31,7 +31,7 @@ public class PermissionServiceImpl implements PermissionService {
         Page<Permission> page = new Page<>(pageRequest.getCurrentPage(), pageRequest.getPageSize());
         QueryWrapper<Permission> queryWrapper = new QueryWrapper<>();
 
-        String name = pageRequest.getParamValue("name");
+        String name = pageRequest.getParamValue("name");//
         String code = pageRequest.getParamValue("code");
         String menuType = pageRequest.getParamValue("menuType");
         if (StringUtils.hasText(name)) {
