@@ -24,7 +24,7 @@ public class CorsConfig {
         config.addAllowedHeader("*");////
 //
         // 允许的请求方式
-        config.addAllowedMethod("*");
+        config.addAllowedMethod("*");//
 
         // 预检请求缓存时间
         config.setMaxAge(3600L);
