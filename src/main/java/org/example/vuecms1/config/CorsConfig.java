@@ -18,7 +18,7 @@ public class CorsConfig {
         config.setAllowCredentials(true);
 //
         // 允许的源，前后端分离开发时可以写前端地址
-        config.addAllowedOriginPattern("*");//
+        config.addAllowedOriginPattern("*");////
 
         // 允许的请求头
         config.addAllowedHeader("*");////
