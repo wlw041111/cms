@@ -20,8 +20,18 @@ jobs:
 
     steps:
       - name: Checkout code
+        env:
+          SSH_AUTH_SOCK: /run/user/1003/keyring/ssh
         run: |
+          echo "Current directory: $(pwd)"
+          echo "Testing SSH connection..."
+          ssh -T git@github.com || true
+          echo "Setting up SSH agent..."
+          eval "$(ssh-agent -s)"
+          ssh-add /home/deploy/.ssh/id_rsa
+          echo "Cloning repository..."
           git clone --depth 1 -b master git@github.com:Xuweiguang10086/vue-cms1.git .
+          echo "Clone completed. Listing files:"
           ls -la
 
       - name: MD5 Fingerprint Detection
