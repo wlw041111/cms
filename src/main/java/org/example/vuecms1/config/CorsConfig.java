@@ -21,7 +21,7 @@ public class CorsConfig {
         config.addAllowedOriginPattern("*");
 
         // 允许的请求头
-        config.addAllowedHeader("*");//
+        config.addAllowedHeader("*");////
 //
         // 允许的请求方式
         config.addAllowedMethod("*");
