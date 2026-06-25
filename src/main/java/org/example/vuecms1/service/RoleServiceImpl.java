@@ -44,6 +44,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Role createRole(RoleDTO roleDTO) {
+
         validateRole(roleDTO);
         ensureRoleNameAvailable(roleDTO.getName(), null);
 
