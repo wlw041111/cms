@@ -27,7 +27,7 @@ jobs:
           find . -mindepth 1 -delete 2>/dev/null || true
           
           echo "Cloning private repository via SSH..."
-          git clone --depth 1 -b master git@github.com:Xuweiguang10086/vue--cms1.git .   # 改这里
+          git clone --depth 1 -b master git@github.com:Xuweiguang10086/vue-cms1.git .   # 改这里
 
       - name: MD5 Fingerprint Detection
         id: filter
