@@ -15,6 +15,7 @@
         SET staute = #{staute}
         WHERE id = #{id}
     </update>
+
     <!-- 更新新闻 -->
     <update id="updatenew">
         UPDATE new_save
