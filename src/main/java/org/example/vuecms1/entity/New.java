@@ -1,8 +1,9 @@
 package org.example.vuecms1.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import java.time.LocalDateTime;
-
+@TableName("new_save")
 @Data
 public class New {
     private Integer id;
