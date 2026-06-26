@@ -36,4 +36,9 @@ log.info("update news status id:{}, status:{}", id, staute);
         log.info("更新新闻：{}", news);
         newMapper.updatenew(news);
     }
+    @DeleteMapping("/delete")
+    public void deleteNews(@RequestParam Long id) {
+        log.info("删除新闻，id:{}", id);
+        newMapper.deleteById(id);
+    }
 }
