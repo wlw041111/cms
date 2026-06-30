@@ -1,46 +1,31 @@
 package org.example.vuecms1.mapper;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.example.vuecms1.entity.New;
-import org.example.vuecms1.entity.Role;
 import org.example.vuecms1.entity.User;
 
 import java.util.List;
+
 @Mapper
 public interface UserMapper {
- List<User> getUser();
-int updateUser(User user);
- int adduser(User user);
- int deleteuser(User user);
- int insertUserRole(User user);
- /**
-  * 插入新闻
-  */
- int insert(New news);
- List<String> selectRole();
- /**
-  * 查询所有新闻
-  */
- List<New> selectAll();
 
- /**
-  * 根据类型查询新闻
-  */
- List<New> selectByType(@Param("newsType") String newsType);
+    List<User> getUser();
 
- /**
-  * 根据ID查询新闻详情
-  */
- New selectById(@Param("id") Integer id);
+    IPage<User> getUserPage(Page<User> page, @Param("username") String username);
 
- /**
-  * 根据ID删除新闻
-  */
-// int deleteById(@Param("id") Integer id);
+    int updateUser(User user);
 
- /**
-  * 更新新闻
-  */
-// int updateById(New news);
+    int adduser(User user);
+
+    int deleteuser(User user);
+
+    int insertUserRole(User user);
+
+    List<String> selectRole();
+
+    boolean hasPermissionByCode(@Param("userId") Integer userId, @Param("permissionCode") String permissionCode);
+
+    List<String> getUserPermissionCodes(@Param("userId") Integer userId);
 }

@@ -1,11 +1,15 @@
 package org.example.vuecms1.service;
 
-import org.example.vuecms1.entity.Role;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.example.vuecms1.entity.User;
+import util.PageRequest;
 
 import java.util.List;
 
 public interface UserService {
-public List<User> getUser();
+
+    List<User> getUser();
+
+    IPage<User> getUserPage(PageRequest pageRequest);
 
 }

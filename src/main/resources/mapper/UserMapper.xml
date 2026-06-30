@@ -10,10 +10,8 @@
         <result property="password" column="password"/>
         <result property="createdTime" column="create_time"/>
         <result property="updatedTime" column="update_time"/>
-        <!-- 关联角色 -->
         <result property="role" column="role_name"/>
     </resultMap>
-
 
     <!-- 查询所有用户（包含角色） -->
     <select id="getUser" resultMap="UserResultMap">
@@ -29,10 +27,30 @@
                  LEFT JOIN role r ON ur.role_id = r.id
         ORDER BY u.id
     </select>
+
+    <!-- 分页查询用户（包含角色），支持按用户名搜索 -->
+    <select id="getUserPage" resultMap="UserResultMap">
+        SELECT
+            u.id,
+            u.username,
+            u.password,
+            u.create_time,
+            u.update_time,
+            r.name AS role_name
+        FROM user u
+                 LEFT JOIN user_role ur ON u.id = ur.user_id
+                 LEFT JOIN role r ON ur.role_id = r.id
+        <where>
+            <if test="username != null and username != ''">
+                AND u.username LIKE CONCAT('%', #{username}, '%')
+            </if>
+        </where>
+        ORDER BY u.id
+    </select>
+
     <insert id="insertUserRole" parameterType="org.example.vuecms1.entity.User">
         INSERT INTO user_role (user_id, role_id)
         VALUES (#{id}, (SELECT id FROM role WHERE name = #{role}))
-        <!-- ↑ 子查询写在 SQL 中，不在 #{} 内 -->
     </insert>
 
     <!-- 根据ID查询用户（包含角色） -->
@@ -70,18 +88,12 @@
             useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user (username, password, create_time, update_time)
         VALUES (#{username}, #{password}, #{createdTime}, #{updatedTime})
-
-
     </insert>
 
-    <!-- 更新用户基本信息 -->
+    <!-- 更新用户角色 -->
     <update id="updateUser" parameterType="org.example.vuecms1.entity.User">
         UPDATE user_role
-        SET role_id = (
-            SELECT id
-            FROM role
-            WHERE name = #{role}
-        )
+        SET role_id = (SELECT id FROM role WHERE name = #{role})
         WHERE user_id = #{id}
     </update>
 
@@ -95,38 +107,30 @@
         DELETE FROM user_role WHERE user_id = #{userId}
     </delete>
 
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO new_save (news_title, news_type, value_html, create_time)
-        VALUES (#{newsTitle}, #{newsType}, #{valueHtml}, NOW())
-    </insert>
-
-    <!-- 查询所有新闻，按时间降序 -->
-    <select id="selectAll" resultType="org.example.vuecms1.entity.New">
-        SELECT id, news_title as newsTitle, news_type as newsType,
-        value_html as valueHtml, create_time as createTime,
-        staute as  staute <!-- 关键修改：将status映射为staute -->
-        FROM new_save
-        ORDER BY create_time DESC
-    </select>
-
-    <!-- 根据类型查询 -->
-    <select id="selectByType" resultType="org.example.vuecms1.entity.New">
-        SELECT id, news_title as newsTitle, news_type as newsType,
-               value_html as valueHtml, create_time as createTime
-        FROM new_save
-        WHERE news_type = #{newsType}
-        ORDER BY create_time DESC
-    </select>
-
-    <!-- 根据ID查询详情 -->
-    <select id="selectById" resultType="org.example.vuecms1.entity.New">
-        SELECT id, news_title as newsTitle, news_type as newsType,
-               value_html as valueHtml, create_time as createTime
-        FROM new_save
-        WHERE id = #{id}
-    </select>
+    <!-- 获取所有角色名称 -->
     <select id="selectRole" resultType="string">
-        select name from role
+        SELECT name FROM role
+    </select>
+
+    <!-- ==================== 权限相关 ==================== -->
+
+    <!-- 通过权限编码检查用户是否有某个权限 -->
+    <select id="hasPermissionByCode" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM user_role ur
+                 INNER JOIN role_permission rp ON ur.role_id = rp.role_id
+                 INNER JOIN permission p ON rp.permission_id = p.id
+        WHERE ur.user_id = #{userId}
+          AND p.code = #{permissionCode}
+    </select>
+
+    <!-- 获取用户所有权限编码 -->
+    <select id="getUserPermissionCodes" resultType="string">
+        SELECT DISTINCT p.code
+        FROM user_role ur
+                 INNER JOIN role_permission rp ON ur.role_id = rp.role_id
+                 INNER JOIN permission p ON rp.permission_id = p.id
+        WHERE ur.user_id = #{userId}
     </select>
 
 </mapper>
