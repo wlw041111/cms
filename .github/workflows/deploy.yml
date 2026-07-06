@@ -80,7 +80,7 @@ jobs:
 
       - name: Local Release and Lifecycle Management
         run: |
-          export JAVA_HOME=/opt/jdk-17.0.12             # 改这里（你的实际路径）
+          export JAVA_HOME=/opt/jdk-17.0.14        # 改这里（你的实际路径）
           export PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:$PATH
           if [ -f "./RUN_MAVEN_BUILD" ]; then
               echo "Action: Full Versioned Deploy"
