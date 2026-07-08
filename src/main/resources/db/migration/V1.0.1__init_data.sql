@@ -11,14 +11,14 @@ INSERT INTO cms.permission (name, type, code, path, parent_id, sort)
 VALUES ('用户信息', 'MENU', 'account:user:list', '/account/user',
         (SELECT id FROM (SELECT id FROM cms.permission WHERE name = '账号管理' AND type = 'DIRECTORY') AS tmp), 1);
 
--- 顶级目录：角色管理
+-- 顶级目录：身份权限
 INSERT INTO cms.permission (name, type, code, path, parent_id, sort)
-VALUES ('角色管理', 'DIRECTORY', 'role:manage', '/role', 0, 3);
+VALUES ('身份权限', 'DIRECTORY', 'role:manage', '/role', 0, 3);
 
--- 菜单：角色信息（隶属于角色管理）
+-- 菜单：权限分配（隶属于身份权限）
 INSERT INTO cms.permission (name, type, code, path, parent_id, sort)
-VALUES ('角色信息', 'MENU', 'role:list', '/role/list',
-        (SELECT id FROM (SELECT id FROM cms.permission WHERE name = '角色管理' AND type = 'DIRECTORY') AS tmp), 1);
+VALUES ('权限分配', 'MENU', 'role:list', '/role/list',
+        (SELECT id FROM (SELECT id FROM cms.permission WHERE name = '身份权限' AND type = 'DIRECTORY') AS tmp), 1);
 
 -- 顶级目录：权限管理
 INSERT INTO cms.permission (name, type, code, path, parent_id, sort)
